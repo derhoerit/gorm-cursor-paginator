@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/derhoerit/gorm-cursor-paginator/v2/internal/util"
+	"github.com/derhoerit/gorm-cursor-paginator/internal/util"
 )
 
 // NewDecoder creates cursor decoder for model
