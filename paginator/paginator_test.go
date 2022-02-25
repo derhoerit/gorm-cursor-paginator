@@ -18,18 +18,26 @@ func TestPaginator(t *testing.T) {
 
 /* models */
 
-type order struct {
-	ID        int       `gorm:"primaryKey"`
+type TestOrder struct {
+	ID        int       `gorm:"primary_key"`
 	Remark    *string   `gorm:"type:varchar(30)"`
 	CreatedAt time.Time `gorm:"type:timestamp;not null"`
 }
 
-type item struct {
-	ID      int     `gorm:"primaryKey"`
+func (o TestOrder) TableName() string {
+	return "orders"
+}
+
+type TestItem struct {
+	ID      int     `gorm:"primary_key"`
 	Name    string  `gorm:"type:varchar(30);not null"`
 	Remark  *string `gorm:"type:varchar(30)"`
 	OrderID int     `gorm:"type:integer;not null"`
-	Order   Order   `gorm:"foreignKey:OrderID"`
+	Order   Order   `gorm:"foreignkey:OrderID"`
+}
+
+func (i TestItem) TableName() string {
+	return "items"
 }
 
 /* paginator suite */
@@ -50,7 +58,7 @@ func (s *paginatorSuite) SetupSuite() {
 		s.FailNow(err.Error())
 	}
 	s.db = db
-	s.db.AutoMigrate(&order{}, &item{})
+	s.db.AutoMigrate(&TestOrder{}, &TestItem{})
 }
 
 /* teardown */
@@ -60,20 +68,20 @@ func (s *paginatorSuite) TearDownTest() {
 }
 
 func (s *paginatorSuite) TearDownSuite() {
-	s.db.Migrator().DropTable(&item{}, &order{})
+	s.db.Migrator().DropTable(&TestItem{}, &TestOrder{})
 }
 
 /* fixtures */
 
-func (s *paginatorSuite) givenOrders(numOrOrders interface{}) (orders []order) {
+func (s *paginatorSuite) givenOrders(numOrOrders interface{}) (orders []TestOrder) {
 	switch v := numOrOrders.(type) {
 	case int:
 		for i := 0; i < v; i++ {
-			orders = append(orders, order{
+			orders = append(orders, TestOrder{
 				CreatedAt: time.Now().Add(time.Duration(i) * time.Hour),
 			})
 		}
-	case []order:
+	case []TestOrder:
 		orders = v
 	default:
 		panic("givenOrders: numOrOrders should be number or orders")
@@ -86,16 +94,16 @@ func (s *paginatorSuite) givenOrders(numOrOrders interface{}) (orders []order) {
 	return
 }
 
-func (s *paginatorSuite) givenItems(order order, numOrItems interface{}) (items []item) {
+func (s *paginatorSuite) givenItems(order TestOrder, numOrItems interface{}) (items []TestItem) {
 	switch v := numOrItems.(type) {
 	case int:
 		for i := 0; i < v; i++ {
-			items = append(items, item{
+			items = append(items, TestItem{
 				Name:    fmt.Sprintf("item %d", i+1),
 				OrderID: order.ID,
 			})
 		}
-	case []item:
+	case []TestItem:
 		items = v
 	default:
 		panic("givenItems: numOrItems should be number or items")
