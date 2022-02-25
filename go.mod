@@ -1,4 +1,4 @@
-module github.com/derhoerit/gorm-cursor-paginator/v3
+module github.com/derhoerit/gorm-cursor-paginator
 
 go 1.17
 
