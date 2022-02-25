@@ -4,14 +4,13 @@ import "github.com/derhoerit/gorm-cursor-paginator/v2/internal/util"
 
 // Rule for paginator
 type Rule struct {
-	Key             string
-	Order           Order
-	SQLRepr         string
-	NULLReplacement interface{}
+	Key     string
+	Order   Order
+	SQLRepr string
 }
 
 func (r *Rule) validate(dest interface{}) (err error) {
-	if _, ok := util.ReflectType(dest).FieldByName(r.Key); !ok {
+	if _, ok := util.ReflectFieldByPath(dest, r.Key); !ok {
 		return ErrInvalidModel
 	}
 	if r.Order != "" {
