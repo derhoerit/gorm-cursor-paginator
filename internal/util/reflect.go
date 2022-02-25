@@ -47,6 +47,9 @@ func ReflectFieldByPath(v interface{}, path string) (reflect.StructField, bool) 
 		if subfield.Type == nil {
 			subfield, ok = ReflectType(v).FieldByName(key)
 		} else {
+			if subfield.Type.Kind() == reflect.Ptr {
+				subfield.Type = subfield.Type.Elem()
+			}
 			subfield, ok = subfield.Type.FieldByName(key)
 		}
 		if !ok {
@@ -65,6 +68,9 @@ func ReflectValueByPath(v interface{}, path string) reflect.Value {
 	subfield := ReflectValue(v)
 	for _, key := range subkeys {
 		if subfield != (reflect.Value{}) {
+			if subfield.Kind() == reflect.Ptr {
+				subfield = subfield.Elem()
+			}
 			subfield = subfield.FieldByName(key)
 		} else {
 			return reflect.Value{}
