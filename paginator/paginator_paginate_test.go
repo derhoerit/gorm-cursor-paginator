@@ -452,6 +452,8 @@ func (s *paginatorSuite) TestPaginateJoinQuery() {
 	s.assertForwardOnly(c)
 }
 
+/* compatibility */
+
 func (s *paginatorSuite) TestPaginateJoinQueryWithAlias() {
 	orders := s.givenOrders(2)
 	// total 6 items
@@ -517,54 +519,6 @@ func (s *paginatorSuite) TestPaginateJoinQueryWithAlias() {
 	s.assertForwardOnly(c)
 }
 
-/* NULL replacement */
-
-func (s *paginatorSuite) TestPaginateReplaceNULL() {
-	s.givenOrders([]order{
-		{ID: 1, Remark: ptrStr("r1")},
-		{ID: 2, Remark: nil},
-		{ID: 3, Remark: ptrStr("r3")},
-		{ID: 4, Remark: nil},
-		{ID: 5, Remark: ptrStr("r5")},
-	})
-
-	cfg := Config{
-		Rules: []Rule{
-			{
-				Key:             "Remark",
-				NULLReplacement: "",
-			},
-			{
-				Key: "ID",
-			},
-		},
-		Limit: 3,
-	}
-
-	var p1 []order
-
-	_, c, _ := New(&cfg).Paginate(s.db, &p1)
-
-	s.assertIDs(p1, 5, 3, 1)
-	s.assertForwardOnly(c)
-
-	var p2 []order
-
-	_, c, _ = New(&cfg, WithAfter(*c.After)).Paginate(s.db, &p2)
-
-	s.assertIDs(p2, 4, 2)
-	s.assertBackwardOnly(c)
-
-	var p3 []order
-
-	_, c, _ = New(&cfg, WithBefore(*c.Before)).Paginate(s.db, &p3)
-
-	s.assertIDs(p3, 5, 3, 1)
-	s.assertForwardOnly(c)
-}
-
-/* compatibility */
-
 func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndKeyOptions() {
 	now := time.Now()
 	s.givenOrders([]order{
@@ -600,9 +554,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndKeyOptions() {
 		WithOrder(ASC),
 		WithAfter(anchorCursor),
 	}
-
 	_, optCursor, _ = New(opts...).Paginate(s.db, &optOrders)
-
 	s.assertIDs(optOrders, 4, 5)
 	s.assertBackwardOnly(optCursor)
 
@@ -611,9 +563,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndKeyOptions() {
 	p.SetLimit(3)
 	p.SetOrder(ASC)
 	p.SetAfterCursor(anchorCursor)
-
 	_, builderCursor, _ = p.Paginate(s.db, &builderOrders)
-
 	s.assertIDs(builderOrders, 4, 5)
 	s.assertBackwardOnly(builderCursor)
 
@@ -628,9 +578,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndKeyOptions() {
 		WithOrder(ASC),
 		WithBefore(anchorCursor),
 	}
-
 	_, optCursor, _ = New(opts...).Paginate(s.db, &optOrders)
-
 	s.assertIDs(optOrders, 1, 2)
 	s.assertForwardOnly(optCursor)
 
@@ -639,9 +587,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndKeyOptions() {
 	p.SetLimit(3)
 	p.SetOrder(ASC)
 	p.SetBeforeCursor(anchorCursor)
-
 	_, builderCursor, _ = p.Paginate(s.db, &builderOrders)
-
 	s.assertIDs(builderOrders, 1, 2)
 	s.assertForwardOnly(builderCursor)
 
@@ -660,7 +606,6 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 	})
 
 	var temp []order
-
 	result, c, err := New(
 		WithKeys("CreatedAt", "ID"),
 		WithLimit(3),
@@ -671,6 +616,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 	if result.Error != nil {
 		s.FailNow(result.Error.Error())
 	}
+
 	anchorCursor := *c.After
 
 	var optOrders, builderOrders []order
@@ -687,9 +633,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 		WithOrder(ASC),
 		WithAfter(anchorCursor),
 	}
-
 	_, optCursor, _ = New(opts...).Paginate(s.db, &optOrders)
-
 	s.assertIDs(optOrders, 4, 5)
 	s.assertBackwardOnly(optCursor)
 
@@ -701,9 +645,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 	p.SetLimit(3)
 	p.SetOrder(ASC)
 	p.SetAfterCursor(anchorCursor)
-
 	_, builderCursor, err = p.Paginate(s.db, &builderOrders)
-
 	s.assertIDs(builderOrders, 4, 5)
 	s.assertBackwardOnly(builderCursor)
 
@@ -721,9 +663,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 		WithOrder(ASC),
 		WithBefore(anchorCursor),
 	}
-
 	_, optCursor, _ = New(opts...).Paginate(s.db, &optOrders)
-
 	s.assertIDs(optOrders, 1, 2)
 	s.assertForwardOnly(optCursor)
 
@@ -735,9 +675,7 @@ func (s *paginatorSuite) TestPaginateConsistencyBetweenBuilderAndRuleOptions() {
 	p.SetLimit(3)
 	p.SetOrder(ASC)
 	p.SetBeforeCursor(anchorCursor)
-
 	_, builderCursor, _ = p.Paginate(s.db, &builderOrders)
-
 	s.assertIDs(builderOrders, 1, 2)
 	s.assertForwardOnly(builderCursor)
 
